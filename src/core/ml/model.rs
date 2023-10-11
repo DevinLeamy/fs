@@ -3,12 +3,16 @@ use std::path::PathBuf;
 use super::driver::*;
 
 /// Initial LLM driver.
-pub struct DefactoModel {}
+pub struct DefactoEmbeddingModel {}
 
-impl DefactoModel {
+impl DefactoEmbeddingModel {
     fn from_path(path: PathBuf) -> Self {
         Self {}
     }
 }
 
-impl LLMDriver for DefactoModel {}
+impl EmbeddingModel for DefactoEmbeddingModel {
+    fn embed(&self, s: String) -> &[f32] {
+        todo!()
+    }
+}
