@@ -1,6 +1,6 @@
-mod driver;
+mod embedding;
 mod model;
 
-pub use driver::*;
+pub use embedding::*;
 pub use model::*;
 

@@ -1,6 +1,8 @@
 mod core;
 mod input;
 
+use std::path::PathBuf;
+
 use crate::core::*;
 use crate::input::*;
 
@@ -14,6 +16,10 @@ fn main() {
     let embedding_model = DefaultEmbeddingModel::from_remote();
     println!(
         "{:?}",
-        embedding_model.embed(String::from("Home directory"))
+        embedding_model.embed_sentence(String::from("Home directory"))
+    );
+    println!(
+        "{:?}",
+        embedding_model.embed_file(PathBuf::from("~/Desktop/IMG_3390.jpeg"))
     );
 }
