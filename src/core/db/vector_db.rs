@@ -6,8 +6,17 @@ pub enum Item {
     File { path: PathBuf },
 }
 
-/// Vector database backed by faiss-rs
+/// Vector database backed by faiss-rs.
+///
+/// https://github.com/Enet4/faiss-rs
 pub struct VectorDatabase {}
+
+impl VectorDatabase {
+    /// Build an empty database.
+    pub fn empty() -> Self {
+        Self {}
+    }
+}
 
 impl VectorDatabase {
     /// Query an item using an embedding.
