@@ -10,4 +10,10 @@ fn main() {
     let response = fs.handle_input(input);
 
     println!("{:?}", response);
+
+    let embedding_model = DefaultEmbeddingModel::from_remote();
+    println!(
+        "{:?}",
+        embedding_model.embed(String::from("Home directory"))
+    );
 }

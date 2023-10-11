@@ -7,15 +7,15 @@ pub enum Input {
 }
 
 pub struct OpenCommand {
-    text: String,
+    pub text: String,
 }
 
 pub struct EditCommand {
-    text: String,
+    pub text: String,
 }
 
 pub struct GotoCommand {
-    text: String,
+    pub text: String,
 }
 
 #[derive(Default)]
@@ -47,7 +47,7 @@ impl FileSystem {
     }
 
     pub fn open(&mut self, command: OpenCommand) {
-        todo!()
+        // todo!()
     }
 
     pub fn goto(&mut self, command: GotoCommand) {

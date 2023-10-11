@@ -25,7 +25,10 @@ pub struct Arguments {
 
 impl Into<Input> for Arguments {
     fn into(self) -> Input {
-        todo!()
+        // todo!()
+        Input::Open(OpenCommand {
+            text: String::from(""),
+        })
     }
 }
 
