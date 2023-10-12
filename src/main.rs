@@ -1,10 +1,12 @@
 mod core;
 mod input;
+mod error;
 
 use faiss::index::NativeIndex;
 use faiss::*;
 use std::path::PathBuf;
 
+use crate::error::*;
 use crate::core::*;
 use crate::input::*;
 

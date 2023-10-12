@@ -565,6 +565,7 @@ dependencies = [
  "clap",
  "faiss",
  "rust-bert",
+ "thiserror",
 ]
 
 [[package]]
