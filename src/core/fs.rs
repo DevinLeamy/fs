@@ -1,4 +1,4 @@
-use super::ml::*;
+use crate::prelude::*;
 
 pub enum Input {
     Open(OpenCommand),
@@ -18,22 +18,23 @@ pub struct GotoCommand {
     pub text: String,
 }
 
-#[derive(Default)]
-pub struct FileSystemConfig {}
+pub struct FileSystemConfig<I: NativeIndex> {
+    pub query_engine: QueryEngine<I>,
+}
 
-pub struct FileSystem;
+pub struct FileSystem<I: NativeIndex> {
+    query_engine: QueryEngine<I>,
+}
 
-impl FileSystem {
-    pub fn init() -> Self {
-        Self {}
-    }
-
-    pub fn from_config(config: FileSystemConfig) -> Self {
-        Self {}
+impl<I: NativeIndex> FileSystem<I> {
+    pub fn from_config(config: FileSystemConfig<I>) -> Self {
+        Self {
+            query_engine: config.query_engine,
+        }
     }
 }
 
-impl FileSystem {
+impl<I: NativeIndex> FileSystem<I> {
     pub fn handle_input(&mut self, input: Input) {
         match input {
             Input::Edit(cmd) => self.edit(cmd),
@@ -54,3 +55,4 @@ impl FileSystem {
         todo!()
     }
 }
+

@@ -7,7 +7,7 @@ pub enum FSError {
 }
 
 impl FSError {
-    pub fn from_string(s: &'static str) -> Self {
+    pub fn from_str(s: &'static str) -> Self {
         FSError::Uncategorized { message: s }
     }
 }

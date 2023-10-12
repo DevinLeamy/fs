@@ -20,7 +20,7 @@ impl DefaultEmbeddingModel {
     pub fn from_remote() -> Result<Self> {
         let model = SentenceEmbeddingsBuilder::remote(SentenceEmbeddingsModelType::AllMiniLmL12V2)
             .create_model()
-            .map_err(|_| FSError::from_string("failed to create remote model"))?;
+            .map_err(|_| FSError::from_str("failed to create remote model"))?;
 
         Ok(Self { model })
     }
@@ -32,7 +32,7 @@ impl SentenceEmbeddingModel for DefaultEmbeddingModel {
         let result = self
             .model
             .encode(&sentences)
-            .map_err(|_| FSError::from_string("failed to embed sentence"))?;
+            .map_err(|_| FSError::from_str("failed to embed sentence"))?;
         Ok(result[0].clone())
     }
 }
