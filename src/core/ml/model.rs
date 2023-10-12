@@ -4,7 +4,7 @@ use rust_bert::pipelines::sentence_embeddings::{
     SentenceEmbeddingsBuilder, SentenceEmbeddingsModel, SentenceEmbeddingsModelType,
 };
 
-use super::embedding::*;
+use crate::prelude::*;
 
 pub const EMBEDDING_SIZE: u32 = 384;
 
@@ -13,17 +13,19 @@ pub struct DefaultEmbeddingModel {
 }
 
 impl DefaultEmbeddingModel {
-    pub fn from_path(path: PathBuf) -> Self {
+    pub fn from_path(path: PathBuf) -> Result<Self> {
         todo!()
     }
 
-    pub fn from_remote() -> Self {
+    pub fn from_remote() -> Result<Self> {
         // TODO: Once an error type is added (e.g. using "thiserror"), this returns a result.
         let model = SentenceEmbeddingsBuilder::remote(SentenceEmbeddingsModelType::AllMiniLmL12V2)
             .create_model()
-            .unwrap();
+            .map_err(|_| FSError::Uncategorized {
+                message: "failed to create remote model",
+            })?;
 
-        Self { model }
+        Ok(Self { model })
     }
 }
 

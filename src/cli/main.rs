@@ -1,21 +1,18 @@
-mod core;
 mod input;
-mod error;
 
 use faiss::index::NativeIndex;
 use faiss::*;
 use std::path::PathBuf;
 
-use crate::error::*;
-use crate::core::*;
-use crate::input::*;
+use fs::prelude::*;
+use input::*;
 
-fn main() {
+fn main() -> Result<()> {
     let input = InputHandler::parse_arguments();
     let mut fs = FileSystem::from_config(FileSystemConfig::default());
     let index = index_factory(EMBEDDING_SIZE, "Flat", MetricType::L2).unwrap();
     let mut database = VectorDatabase::from_index(index);
-    let embedder = DefaultEmbeddingModel::from_remote();
+    let embedder = DefaultEmbeddingModel::from_remote()?;
     load_files(&mut database, &embedder);
 
     let response = fs.handle_input(input);
@@ -23,6 +20,8 @@ fn main() {
     println!("Files Indexed[{:?}]", database.len());
     let photo = embedder.embed_sentence(String::from("Programming language"));
     println!("Result: {:?}", database.query(photo));
+
+    Ok(())
 }
 
 /// Temporary helper to manually load files into the vector store, before we setup a better
