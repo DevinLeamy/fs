@@ -16,9 +16,9 @@ fn main() -> Result<()> {
     let mut fs = FileSystem::from_config(FileSystemConfig {
         query_engine: engine,
     });
-    let response = fs.handle_input(input);
 
-    println!("Response[{:?}]", response);
+    let response = fs.handle_input(input)?;
+    println!("File: {}", response);
     Ok(())
 }
 

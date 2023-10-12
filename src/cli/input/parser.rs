@@ -1,23 +1,29 @@
-use fs::prelude::*;
 use clap::*;
+use fs::prelude::*;
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 enum Command {
     Open(Open),
     Edit(Edit),
     Goto(Goto),
 }
 
-#[derive(Parser)]
-struct Open {}
+#[derive(Parser, Debug)]
+struct Open {
+    text: String,
+}
 
-#[derive(Parser)]
-struct Edit {}
+#[derive(Parser, Debug)]
+struct Edit {
+    text: String,
+}
 
-#[derive(Parser)]
-struct Goto {}
+#[derive(Parser, Debug)]
+struct Goto {
+    text: String,
+}
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 pub struct Arguments {
     #[command(subcommand)]
     subcommand: Command,
@@ -25,10 +31,15 @@ pub struct Arguments {
 
 impl Into<Input> for Arguments {
     fn into(self) -> Input {
-        // todo!()
-        Input::Open(OpenCommand {
-            text: String::from(""),
-        })
+        // This conversion from Arguments to Input to pretty useless now,
+        // but the idea that when commands come with options, or there are
+        // commands that aren't inputs (e.g. check the version), you don't
+        // have to modify Input.
+        match self.subcommand {
+            Command::Open(Open { text }) => Input::Open(OpenCommand { text }),
+            Command::Edit(Edit { text }) => Input::Edit(EditCommand { text }),
+            Command::Goto(Goto { text }) => Input::Goto(GotoCommand { text }),
+        }
     }
 }
 
