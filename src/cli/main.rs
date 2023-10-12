@@ -18,7 +18,7 @@ fn main() -> Result<()> {
     let response = fs.handle_input(input);
     // println!("{:?}", response);
     println!("Files Indexed[{:?}]", database.len());
-    let photo = embedder.embed_sentence(String::from("Programming language"));
+    let photo = embedder.embed_sentence(String::from("Programming language"))?;
     println!("Result: {:?}", database.query(photo));
 
     Ok(())
@@ -40,7 +40,7 @@ fn load_file<I: NativeIndex>(
     embedder: &DefaultEmbeddingModel,
     path: PathBuf,
 ) {
-    let embedding = embedder.embed_file(path.clone());
+    let embedding = embedder.embed_file(path.clone()).unwrap();
     database.add(embedding, Item::File { path });
 }
 
