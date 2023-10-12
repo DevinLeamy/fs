@@ -15,3 +15,4 @@ path = "src/main.rs"
 [dependencies]
 clap = { version = "4.4.3", features = ["derive"] }
 rust-bert = "0.21.0"
+faiss = { version = "0.12.1", features = [] }

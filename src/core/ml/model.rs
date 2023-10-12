@@ -6,6 +6,8 @@ use rust_bert::pipelines::sentence_embeddings::{
 
 use super::embedding::*;
 
+pub const EMBEDDING_SIZE: u32 = 384;
+
 pub struct DefaultEmbeddingModel {
     model: SentenceEmbeddingsModel,
 }
