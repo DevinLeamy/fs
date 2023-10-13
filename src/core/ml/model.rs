@@ -13,7 +13,7 @@ pub struct DefaultEmbeddingModel {
 }
 
 impl DefaultEmbeddingModel {
-    pub fn from_path(path: PathBuf) -> Result<Self> {
+    pub fn from_path(_path: PathBuf) -> Result<Self> {
         todo!()
     }
 
@@ -39,6 +39,6 @@ impl SentenceEmbeddingModel for DefaultEmbeddingModel {
 
 impl FileEmbeddingModel for DefaultEmbeddingModel {
     fn embed_file(&self, path: PathBuf) -> Result<Vec<f32>> {
-        Ok(self.embed_sentence(path.to_str().unwrap().to_string())?)
+        self.embed_sentence(path.to_str().unwrap().to_string())
     }
 }

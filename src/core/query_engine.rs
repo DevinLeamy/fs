@@ -18,6 +18,12 @@ pub struct QueryEngineBuilder<I: NativeIndex> {
     database: Option<VectorDatabase<I>>,
 }
 
+impl<I: NativeIndex> Default for QueryEngineBuilder<I> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<I: NativeIndex> QueryEngineBuilder<I> {
     pub fn new() -> Self {
         Self {

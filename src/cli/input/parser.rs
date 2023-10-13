@@ -30,13 +30,13 @@ pub struct Arguments {
     pub subcommand: Command,
 }
 
-impl Into<Input> for Arguments {
-    fn into(self) -> Input {
+impl From<Arguments> for Input {
+    fn from(val: Arguments) -> Self {
         // This conversion from Arguments to Input to pretty useless now,
         // but the idea that when commands come with options, or there are
         // commands that aren't inputs (e.g. check the version), you don't
         // have to modify Input.
-        match self.subcommand {
+        match val.subcommand {
             Command::Open(Open { text }) => Input::Open(OpenCommand { text }),
             Command::Edit(Edit { text }) => Input::Edit(EditCommand { text }),
             Command::Goto(Goto { text }) => Input::Goto(GotoCommand { text }),

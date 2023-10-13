@@ -41,6 +41,6 @@ fn fetch_files() -> Vec<PathBuf> {
     ];
     raw_paths
         .into_iter()
-        .map(|path| PathBuf::from(path))
+        .map(PathBuf::from)
         .collect()
 }

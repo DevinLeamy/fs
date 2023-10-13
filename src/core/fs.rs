@@ -43,11 +43,11 @@ impl<I: NativeIndex> FileSystem<I> {
         }
     }
 
-    pub fn edit(&mut self, command: EditCommand) -> Result<String> {
+    pub fn edit(&mut self, _command: EditCommand) -> Result<String> {
         todo!()
     }
 
-    pub fn open(&mut self, command: OpenCommand) -> Result<String> {
+    pub fn open(&mut self, _command: OpenCommand) -> Result<String> {
         todo!()
     }
 
