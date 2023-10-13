@@ -566,6 +566,7 @@ dependencies = [
  "faiss",
  "rust-bert",
  "serde",
+ "serde_json",
  "thiserror",
 ]
 

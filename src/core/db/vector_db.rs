@@ -1,6 +1,9 @@
 use std::{collections::HashMap, path::PathBuf};
 
-use crate::{prelude::*, shared::utils::unsafe_path_string};
+use crate::{
+    prelude::*,
+    shared::{utils::unsafe_path_string, Save},
+};
 use faiss::{index::NativeIndex, *};
 use rust_bert::pipelines::sentence_embeddings::Embedding;
 
@@ -18,14 +21,14 @@ struct SerializedVectorDatabase(PathBuf, HashMap<u64, Item>);
 ///
 /// https://github.com/Enet4/faiss-rs
 pub struct VectorDatabase<I: NativeIndex> {
-    index: IdMap<I>,
+    index: I,
     items: HashMap<ItemId, Item>,
 }
 
 impl<I: NativeIndex> VectorDatabase<I> {
     pub fn from_index(index: I) -> Self {
         Self {
-            index: IdMap::new(index).unwrap(),
+            index,
             items: HashMap::new(),
         }
     }
@@ -46,9 +49,8 @@ impl<I: NativeIndex> VectorDatabase<I> {
     pub fn add(&mut self, embedding: Embedding, item: Item) {
         let item_id = self.generate_item_id();
         self.items.insert(item_id, item);
-        self.index
-            .add_with_ids(&embedding, &[Idx::new(item_id)])
-            .unwrap();
+        // Here we're naively assuming that IDs are assigned sequentially, starting from 0.
+        self.index.add(&embedding).unwrap();
     }
 
     /// Number of items in the database.
@@ -64,17 +66,17 @@ impl<I: NativeIndex> VectorDatabase<I> {
         self.items.len() as u64
     }
 
-    /// Serialized indexdatabase path.
-    fn path(&self) -> PathBuf {
+    /// Serialized index database path.
+    fn index_path(&self) -> PathBuf {
         // Note: Eventually this will be some ~/.local/fs/db/index
-        PathBuf::from("./assets/index")
+        PathBuf::from("./assets/db/index")
     }
 }
 
 impl Serialize for VectorDatabase<IndexImpl> {
     fn serialize<S: Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
         let items = &self.items;
-        let index_path = self.path();
+        let index_path = self.index_path();
         write_index(&self.index, unsafe_path_string(&index_path))
             .map_err(serde::ser::Error::custom)?;
         SerializedVectorDatabase(index_path, items.clone()).serialize(serializer)
@@ -85,11 +87,23 @@ impl<'d> Deserialize<'d> for VectorDatabase<IndexImpl> {
     fn deserialize<D: Deserializer<'d>>(deserializer: D) -> std::result::Result<Self, D::Error> {
         let SerializedVectorDatabase(index_path, items) = Deserialize::deserialize(deserializer)?;
         let index = read_index(unsafe_path_string(&index_path)).map_err(de::Error::custom)?;
-        Ok(Self {
-            // Unsure as to whether this will keep our index mappings.
-            // I assume it won't meaning we'll have to develop a better id-ing solution.
-            index: IdMap::new(index).unwrap(),
-            items,
-        })
+        Ok(Self { index, items })
+    }
+}
+
+impl<'d> Save<'d> for VectorDatabase<IndexImpl> {
+    fn path() -> PathBuf {
+        // Note: Eventually this will be some ~/.local/fs/db/index
+        PathBuf::from("./assets/db/index.json")
+    }
+
+    fn restore() -> Self {
+        let file_contents = std::fs::read_to_string(Self::path()).unwrap();
+        serde_json::from_str(&file_contents).expect("failed to read database")
+    }
+
+    fn save(&self) {
+        let serialized_db = serde_json::to_string(self).unwrap();
+        std::fs::write(Self::path(), serialized_db).expect("failed to save database");
     }
 }

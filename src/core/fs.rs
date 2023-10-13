@@ -19,7 +19,7 @@ pub struct GotoCommand {
 }
 
 pub struct FileSystemConfig<I: NativeIndex> {
-    pub query_engine: QueryEngine<I>,
+    pub engine: QueryEngine<I>,
 }
 
 pub struct FileSystem<I: NativeIndex> {
@@ -29,7 +29,7 @@ pub struct FileSystem<I: NativeIndex> {
 impl<I: NativeIndex> FileSystem<I> {
     pub fn from_config(config: FileSystemConfig<I>) -> Self {
         Self {
-            engine: config.query_engine,
+            engine: config.engine,
         }
     }
 }
@@ -57,5 +57,11 @@ impl<I: NativeIndex> FileSystem<I> {
             Item::File { path } => Ok(path.to_str().unwrap().to_string()),
             _ => Err(FSError::from_str("query did not return a file path")),
         }
+    }
+}
+
+impl FileSystem<IndexImpl> {
+    pub fn save(&self) {
+        self.engine.save();
     }
 }

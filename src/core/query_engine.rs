@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, shared::Save};
 
 pub struct QueryEngine<I: NativeIndex> {
     // TODO: This is to be replaced by a trait bound once the right way to define the trait is clear.
@@ -23,6 +23,12 @@ impl<I: NativeIndex> QueryEngine<I> {
     pub fn search(&mut self, query: String) -> Result<Item> {
         let embedding = self.embedder.embed_sentence(query)?;
         Ok(self.database.query(embedding))
+    }
+}
+
+impl QueryEngine<IndexImpl> {
+    pub fn save(&self) {
+        self.database.save();
     }
 }
 
