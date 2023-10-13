@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::PathBuf};
 
-use crate::{prelude::*, utils::unsafe_path_string};
+use crate::{prelude::*, shared::utils::unsafe_path_string};
 use faiss::{index::NativeIndex, *};
 use rust_bert::pipelines::sentence_embeddings::Embedding;
 
