@@ -59,9 +59,3 @@ impl<I: NativeIndex> FileSystem<I> {
         }
     }
 }
-
-impl FileSystem<IndexImpl> {
-    pub fn save(&self) {
-        self.engine.save();
-    }
-}

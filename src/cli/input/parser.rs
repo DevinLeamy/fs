@@ -2,31 +2,32 @@ use clap::*;
 use fs::prelude::*;
 
 #[derive(Parser, Debug)]
-enum Command {
+pub enum Command {
     Open(Open),
     Edit(Edit),
     Goto(Goto),
+    Load,
 }
 
 #[derive(Parser, Debug)]
-struct Open {
+pub struct Open {
     text: String,
 }
 
 #[derive(Parser, Debug)]
-struct Edit {
+pub struct Edit {
     text: String,
 }
 
 #[derive(Parser, Debug)]
-struct Goto {
+pub struct Goto {
     text: String,
 }
 
 #[derive(Parser, Debug)]
 pub struct Arguments {
     #[command(subcommand)]
-    subcommand: Command,
+    pub subcommand: Command,
 }
 
 impl Into<Input> for Arguments {
@@ -39,6 +40,7 @@ impl Into<Input> for Arguments {
             Command::Open(Open { text }) => Input::Open(OpenCommand { text }),
             Command::Edit(Edit { text }) => Input::Edit(EditCommand { text }),
             Command::Goto(Goto { text }) => Input::Goto(GotoCommand { text }),
+            _ => panic!("invalid option"),
         }
     }
 }
@@ -47,7 +49,7 @@ pub struct InputHandler {}
 
 impl InputHandler {
     /// Generates a well formed input from command line input.
-    pub fn parse_arguments() -> Input {
-        Arguments::parse().into()
+    pub fn parse(arguments: Arguments) -> Input {
+        arguments.into()
     }
 }

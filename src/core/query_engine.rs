@@ -1,4 +1,4 @@
-use crate::{prelude::*, shared::Save};
+use crate::prelude::*;
 
 pub struct QueryEngine<I: NativeIndex> {
     // TODO: This is to be replaced by a trait bound once the right way to define the trait is clear.
@@ -7,28 +7,9 @@ pub struct QueryEngine<I: NativeIndex> {
 }
 
 impl<I: NativeIndex> QueryEngine<I> {
-    /// Temporary helper to manually load files into the vector store, before we setup a better
-    /// solution.
-    pub fn load_test_files(&mut self, paths: Vec<PathBuf>) {
-        for file_path in paths {
-            if !file_path.is_file() {
-                println!("{:?} is not a file", file_path);
-                continue;
-            }
-            let embedding = self.embedder.embed_file(file_path.clone()).unwrap();
-            self.database.add(embedding, Item::File { path: file_path });
-        }
-    }
-
     pub fn search(&mut self, query: String) -> Result<Item> {
         let embedding = self.embedder.embed_sentence(query)?;
         Ok(self.database.query(embedding))
-    }
-}
-
-impl QueryEngine<IndexImpl> {
-    pub fn save(&self) {
-        self.database.save();
     }
 }
 
