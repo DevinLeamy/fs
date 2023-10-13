@@ -1,14 +1,18 @@
 use std::{collections::HashMap, path::PathBuf};
 
+use crate::{prelude::*, utils::unsafe_path_string};
 use faiss::{index::NativeIndex, *};
 use rust_bert::pipelines::sentence_embeddings::Embedding;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Item {
     File { path: PathBuf },
 }
 
 type ItemId = u64;
+
+#[derive(Serialize, Deserialize)]
+struct SerializedVectorDatabase(PathBuf, HashMap<u64, Item>);
 
 /// Vector database backed by faiss-rs.
 ///
@@ -58,5 +62,34 @@ impl<I: NativeIndex> VectorDatabase<I> {
     fn generate_item_id(&self) -> ItemId {
         // Note: Not a long-term solution.
         self.items.len() as u64
+    }
+
+    /// Serialized indexdatabase path.
+    fn path(&self) -> PathBuf {
+        // Note: Eventually this will be some ~/.local/fs/db/index
+        PathBuf::from("./assets/index")
+    }
+}
+
+impl Serialize for VectorDatabase<IndexImpl> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
+        let items = &self.items;
+        let index_path = self.path();
+        write_index(&self.index, unsafe_path_string(&index_path))
+            .map_err(serde::ser::Error::custom)?;
+        SerializedVectorDatabase(index_path, items.clone()).serialize(serializer)
+    }
+}
+
+impl<'d> Deserialize<'d> for VectorDatabase<IndexImpl> {
+    fn deserialize<D: Deserializer<'d>>(deserializer: D) -> std::result::Result<Self, D::Error> {
+        let SerializedVectorDatabase(index_path, items) = Deserialize::deserialize(deserializer)?;
+        let index = read_index(unsafe_path_string(&index_path)).map_err(de::Error::custom)?;
+        Ok(Self {
+            // Unsure as to whether this will keep our index mappings.
+            // I assume it won't meaning we'll have to develop a better id-ing solution.
+            index: IdMap::new(index).unwrap(),
+            items,
+        })
     }
 }

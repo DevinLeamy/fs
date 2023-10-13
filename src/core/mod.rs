@@ -4,10 +4,12 @@ mod fs;
 mod ml;
 mod query_engine;
 mod shared;
+mod utils;
 
 pub mod prelude {
     pub use faiss::{index::*, *};
     pub use rust_bert::*;
+    pub use serde::*;
     pub use std::path::*;
 
     pub use super::db::*;
