@@ -12,18 +12,24 @@ impl<I: NativeIndex> DatabaseLoader<I> {
 }
 
 impl DatabaseLoader<IndexImpl> {
-    pub fn load_files(&mut self, files: Vec<PathBuf>) {
+    pub fn load_files(&mut self, files: Vec<PathBuf>) -> Result<()> {
         for file_path in files {
-            let embedding = self.embedder.embed_file(file_path.clone()).unwrap();
-            self.database.add(embedding, Item::File { path: file_path });
+            let embedding = self.embedder.embed_file(file_path.clone())?;
+            self.database
+                .add(embedding, Item::File { path: file_path })?;
         }
         self.save();
+
+        Ok(())
     }
 
-    pub fn load_file(&mut self, file_path: PathBuf) {
-        let embedding = self.embedder.embed_file(file_path.clone()).unwrap();
-        self.database.add(embedding, Item::File { path: file_path });
+    pub fn load_file(&mut self, file_path: PathBuf) -> Result<()> {
+        let embedding = self.embedder.embed_file(file_path.clone())?;
+        self.database
+            .add(embedding, Item::File { path: file_path })?;
         self.save();
+
+        Ok(())
     }
 }
 

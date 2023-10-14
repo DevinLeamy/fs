@@ -9,7 +9,7 @@ pub struct QueryEngine<I: NativeIndex> {
 impl<I: NativeIndex> QueryEngine<I> {
     pub fn search(&mut self, query: String) -> Result<Item> {
         let embedding = self.embedder.embed_sentence(query)?;
-        Ok(self.database.query(embedding))
+        self.database.query(embedding)
     }
 }
 

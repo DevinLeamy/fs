@@ -14,7 +14,7 @@ fn main() -> Result<()> {
     if matches!(arguments.subcommand, Command::Load) {
         // Load files into the index.
         let mut loader = DatabaseLoader::new(database, embedder);
-        loader.load_files(fetch_files());
+        loader.load_files(fetch_files())?;
     } else {
         // Handle commands.
         let input = InputHandler::parse(arguments);

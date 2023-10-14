@@ -36,30 +36,54 @@ impl<I: NativeIndex> VectorDatabase<I> {
 
 impl<I: NativeIndex> VectorDatabase<I> {
     /// Query an item using an embedding.
-    pub fn query(&mut self, embedding: Embedding) -> Item {
-        let result = self.index.search(&embedding, 3).unwrap();
+    pub fn query(&mut self, embedding: Embedding) -> Result<Item> {
+        let result = self.query_k(&embedding, 3)?;
         println!("{:?}", result);
         let index = result.labels[0];
         let id = index.get().unwrap();
 
-        self.items.get(&id).unwrap().clone()
+        Ok(self.items.get(&id).unwrap().clone())
     }
 
     /// Associate and embedding with an item.
-    pub fn add(&mut self, embedding: Embedding, item: Item) {
+    pub fn add(&mut self, embedding: Embedding, item: Item) -> Result<()> {
+        if self.contains(&embedding)? {
+            println!("VectorDatabase::add - duplicate embedding ignored");
+            return Ok(());
+        }
         let item_id = self.generate_item_id();
         self.items.insert(item_id, item);
+
         // Here we're naively assuming that IDs are assigned sequentially, starting from 0.
-        self.index.add(&embedding).unwrap();
+        self.index
+            .add(&embedding)
+            .map_err(|_| FSError::from_str("failed to add new embedding to vector store"))?;
+
+        Ok(())
     }
 
     /// Number of items in the database.
     pub fn len(&self) -> usize {
         self.items.len()
     }
+
+    /// Check if the database already contains an embedding.
+    pub fn contains(&mut self, embedding: &Embedding) -> Result<bool> {
+        let result = self.query_k(embedding, 1)?;
+        let distances = result.distances;
+
+        Ok(distances.len() > 0 && distances[0] == 0.0)
+    }
 }
 
 impl<I: NativeIndex> VectorDatabase<I> {
+    /// Query the index for up to `k` results.
+    fn query_k(&mut self, embedding: &Embedding, k: usize) -> Result<SearchResult> {
+        self.index
+            .search(embedding, k)
+            .map_err(|_| FSError::from_str("failed to query vector store"))
+    }
+
     /// Generate a new item id.
     fn generate_item_id(&self) -> ItemId {
         // Note: Not a long-term solution.
