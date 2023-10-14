@@ -40,7 +40,9 @@ impl<I: NativeIndex> VectorDatabase<I> {
         let result = self.query_k(&embedding, 3)?;
         println!("{:?}", result);
         let index = result.labels[0];
-        let id = index.get().unwrap();
+        let Some(id) = index.get() else {
+            return Err(FSError::from_str("no results from query"));
+        };
 
         Ok(self.items.get(&id).unwrap().clone())
     }

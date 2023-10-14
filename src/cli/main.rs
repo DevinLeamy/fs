@@ -6,11 +6,14 @@ use input::*;
 
 fn main() -> Result<()> {
     let arguments = Arguments::parse();
-    let database = VectorDatabase::restore();
-    // let index = index_factory(EMBEDDING_SIZE, "Flat", MetricType::L2).unwrap();
-    // let database = VectorDatabase::from_index(index);
-    let embedder = DefaultEmbeddingModel::from_remote()?;
+    let database = if VectorDatabase::exists() {
+        VectorDatabase::restore()
+    } else {
+        let index = index_factory(EMBEDDING_SIZE, "Flat", MetricType::L2).unwrap();
+        VectorDatabase::from_index(index)
+    };
 
+    let embedder = DefaultEmbeddingModel::from_remote()?;
     if matches!(arguments.subcommand, Command::Load) {
         // Load files into the index.
         let mut loader = DatabaseLoader::new(database, embedder);
@@ -39,8 +42,5 @@ fn fetch_files() -> Vec<PathBuf> {
         "/Users/Devin/Desktop/Github/DevinLeamy/fs/src/cli/main.rs",
         "/Users/Devin/Desktop/Carina Nebula.png",
     ];
-    raw_paths
-        .into_iter()
-        .map(PathBuf::from)
-        .collect()
+    raw_paths.into_iter().map(PathBuf::from).collect()
 }

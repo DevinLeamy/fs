@@ -10,4 +10,8 @@ pub trait Save<'d>: Serialize + Deserialize<'d> {
     fn restore() -> Self;
     /// Save to path.
     fn save(&self);
+    /// Check if the asset exists.
+    fn exists() -> bool {
+        Self::path().exists()
+    }
 }
