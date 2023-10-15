@@ -14,6 +14,7 @@ impl<I: NativeIndex> DatabaseLoader<I> {
 impl DatabaseLoader<IndexImpl> {
     pub fn load_files(&mut self, files: Vec<PathBuf>) -> Result<()> {
         for file_path in files {
+            println!("Loading file: {:?}", file_path);
             let embedding = self.embedder.embed_file(file_path.clone())?;
             self.database
                 .add(embedding, Item::File { path: file_path })?;

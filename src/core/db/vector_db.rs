@@ -6,6 +6,7 @@ use crate::{
 };
 use faiss::{index::NativeIndex, *};
 use rust_bert::pipelines::sentence_embeddings::Embedding;
+use std::fmt;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Item {
@@ -16,6 +17,31 @@ type ItemId = u64;
 
 #[derive(Serialize, Deserialize)]
 struct SerializedVectorDatabase(PathBuf, HashMap<u64, Item>);
+
+struct SearchResult {
+    items: Vec<Item>,
+    distances: Vec<f32>,
+}
+
+impl SearchResult {
+    fn len(&self) -> usize {
+        self.items.len()
+    }
+
+    fn lowest_distance_item(&self) -> Option<Item> {
+        self.items.first().cloned()
+    }
+}
+
+impl fmt::Display for SearchResult {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for i in 0..self.len() {
+            writeln!(f, "[{:.2?}] {:?} ", self.distances[i], self.items[i])?;
+        }
+
+        Ok(())
+    }
+}
 
 /// Vector database backed by faiss-rs.
 ///
@@ -37,14 +63,12 @@ impl<I: NativeIndex> VectorDatabase<I> {
 impl<I: NativeIndex> VectorDatabase<I> {
     /// Query an item using an embedding.
     pub fn query(&mut self, embedding: Embedding) -> Result<Item> {
-        let result = self.query_k(&embedding, 3)?;
-        println!("{:?}", result);
-        let index = result.labels[0];
-        let Some(id) = index.get() else {
+        let result = self.query_k(&embedding, 5)?;
+        let Some(closest) = result.lowest_distance_item() else {
             return Err(FSError::from_str("no results from query"));
         };
-
-        Ok(self.items.get(&id).unwrap().clone())
+        println!("{result}");
+        Ok(closest)
     }
 
     /// Associate and embedding with an item.
@@ -72,18 +96,34 @@ impl<I: NativeIndex> VectorDatabase<I> {
     /// Check if the database already contains an embedding.
     pub fn contains(&mut self, embedding: &Embedding) -> Result<bool> {
         let result = self.query_k(embedding, 1)?;
-        let distances = result.distances;
-
-        Ok(distances.len() > 0 && distances[0] == 0.0)
+        Ok(result.len() > 0 && result.distances[0] == 0.0)
     }
 }
 
 impl<I: NativeIndex> VectorDatabase<I> {
     /// Query the index for up to `k` results.
     fn query_k(&mut self, embedding: &Embedding, k: usize) -> Result<SearchResult> {
-        self.index
+        let raw_result = self
+            .index
             .search(embedding, k)
-            .map_err(|_| FSError::from_str("failed to query vector store"))
+            .map_err(|_| FSError::from_str("failed to query vector store"))?;
+
+        let mut items = Vec::<Item>::new();
+        let mut distances = Vec::<f32>::new();
+        for (i, index) in raw_result.labels.iter().enumerate() {
+            let Some(id) = index.get() else {
+                // ith entry was found.
+                continue;
+            };
+            if !self.items.contains_key(&id) {
+                // The given embedding has not been stored.
+                continue;
+            }
+            items.push(self.items.get(&id).unwrap().clone());
+            distances.push(raw_result.distances[i])
+        }
+
+        Ok(SearchResult { items, distances })
     }
 
     /// Generate a new item id.
