@@ -17,7 +17,7 @@ fn main() -> Result<()> {
     if matches!(arguments.subcommand, Command::Load) {
         // Load files into the index.
         let mut loader = DatabaseLoader::new(database, embedder);
-        loader.load_files(fetch_files("/Users/Devin/Desktop/School"))?;
+        loader.load_files(fetch_files("/Users/Devin/Desktop/Github/DevinLeamy"))?;
     } else {
         // Handle commands.
         let input = InputHandler::parse(arguments);
@@ -45,6 +45,12 @@ fn fetch_files(directory: impl AsRef<Path>) -> Vec<PathBuf> {
         return vec![];
     }
     if directory_path.ends_with("target") {
+        return vec![];
+    }
+    if directory_path.ends_with("node_modules") {
+        return vec![];
+    }
+    if directory_path.ends_with("lib") {
         return vec![];
     }
     let mut paths = Vec::<PathBuf>::new();

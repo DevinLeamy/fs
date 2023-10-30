@@ -4,7 +4,6 @@ mod fs;
 mod ml;
 mod query_engine;
 mod shared;
-mod utils;
 
 pub mod prelude {
     pub use super::db::*;

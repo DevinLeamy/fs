@@ -4,7 +4,7 @@ use rust_bert::pipelines::sentence_embeddings::{
     SentenceEmbeddingsBuilder, SentenceEmbeddingsModel, SentenceEmbeddingsModelType,
 };
 
-use crate::prelude::*;
+use crate::{prelude::*, shared::unsafe_path_string};
 
 pub const EMBEDDING_SIZE: u32 = 384;
 
@@ -39,6 +39,21 @@ impl SentenceEmbeddingModel for DefaultEmbeddingModel {
 
 impl FileEmbeddingModel for DefaultEmbeddingModel {
     fn embed_file(&self, path: PathBuf) -> Result<Vec<f32>> {
-        self.embed_sentence(path.to_str().unwrap().to_string())
+        let file_sentence = format!(
+            "{:?}\n{:?}",
+            unsafe_path_string(&path),
+            self.file_to_string(&path)
+        );
+        self.embed_sentence(file_sentence)
+    }
+}
+
+impl DefaultEmbeddingModel {
+    fn file_to_string(&self, path: &PathBuf) -> String {
+        if let Ok(s) = std::fs::read_to_string(path) {
+            s
+        } else {
+            String::from("")
+        }
     }
 }
